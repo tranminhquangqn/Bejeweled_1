@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Img/Blue1.png</file>
+        <file>Img/Green2.png</file>
+        <file>Img/Orange3.png</file>
+        <file>Img/Purple4.png</file>
+        <file>Img/Red5.png</file>
+        <file>Img/White6.png</file>
+        <file>Img/Yellow7.png</file>
+        <file>Img/logo.png</file>
+        <file>Img/gameover.png</file>
+    </qresource>
+</RCC>
