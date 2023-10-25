@@ -10,5 +10,8 @@
         <file>Img/Yellow7.png</file>
         <file>Img/logo.png</file>
         <file>Img/gameover.png</file>
+        <file>Img/hintball.png</file>
+        <file>Hint.js</file>
+        <file>Img/Explosion.gif</file>
     </qresource>
 </RCC>

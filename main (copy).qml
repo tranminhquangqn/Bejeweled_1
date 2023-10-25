@@ -1,9 +1,9 @@
-﻿import QtQuick 2.9
+import QtQuick 2.9
 import QtQuick 2.0
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.2
 import QtQuick.Controls 2.2
-import "qrc:/Hint.js" as Hint
+
 
 Window {
     id: window
@@ -21,11 +21,10 @@ Window {
     property var oldindex:[]
     property var droplist:[]
     property bool lock: false
-    signal startAnimation(var pos)
     property var shuffleLeft: 5
+    property var oldScore: 0
     property var bonus:0
-    property var checksecondpick: false
-
+    signal startAnimation(var pos)
 
 
     function uniq(arr) {
@@ -69,6 +68,7 @@ Window {
     function resetGame(){
         var i,j
         score=0
+        shuffleLeft=5
         timebar.value=60
         firstPick = -1
         secondPick = -1
@@ -78,7 +78,6 @@ Window {
 //                console.log(gridBg.columns*i+j)
                 rpItem.itemAt(gridBg.columns*i+j).children[0].source=dlist[Math.floor(Math.random()*dlist.length)]
                 rpItem.itemAt(gridBg.columns*i+j).children[0].opacity=1
-                rpItem.itemAt(gridBg.columns*i+j).children[0].scale=1
             }
         }
     }
@@ -136,7 +135,7 @@ Window {
                     id: rect1
                     width: gridBg.width/ gridBg.columns
                     height: gridBg.height / gridBg.rows
-                    color: index % 2 === 0 ? "#202020" : "gray"
+                    color: index % 2 === 0 ? "#D5D8DC" : "#6E2C00"
                     border.color: "black"
                     Image {
                         id: imageI
@@ -156,31 +155,28 @@ Window {
 //                                console.log("checkIndexInList",checkIndexInList(imageI.self_index), "index", imageI.self_index, !imageI.startAni)
                                 if(!imageI.startAni && checkIndexInList(imageI.self_index)){ // dieu kien  nay bi sai, chay co 1 lan
 //                                    console.log("drop(index)", drop(index), "index",imageI.self_index, "uniq", uniq(mlist), "droplist", droplist)
-                                    animation_.from = -(index-oldindex[index])/gridBg.columns*rect1.height
-                                    animation_.duration = 200*(index-oldindex[index])/gridBg.columns
                                     imageI.startAni = true
                                 }
                             }
                         }
                         NumberAnimation {
-                            id: animation_
                             target: imageI
                             property: "y"
 //                            from: checkIndexInList(imageI.self_index) ? -50: 6
                             /*((index-oldindex)/gridBg.columns)*rect1.height*/
-//                            from: -100
+                            from: -((index-oldindex[index])/gridBg.columns)*rect1.height
                             to: 6
-
-                            easing.type: Easing.OutBounce;
+                            duration: (index-oldindex[index])/gridBg.columns > 0 ? 2000*((index-oldindex[index])/gridBg.columns) : 1
+                            easing.type: Easing.Linear;
                             running: imageI.startAni
 
                             onStarted: {
-//                                  console.log("index", index, "duration", duration, "fatory", (index-oldindex[index])/gridBg.columns,  "from", from)
+                                  console.log(-((index-oldindex[index])/gridBg.columns)*rect1.height)
     //                            imageI.anchors.centerIn = undefined
                             }
                             onStopped: {
                                 imageI.startAni = false // khong reset bien nay ve flase
-//                                console.log("Stoped")
+                                console.log("Stoped")
 
     //                                imageI.anchors.centerIn = rect1
                             }
@@ -192,21 +188,14 @@ Window {
 
                     MouseArea{
                         anchors.fill: parent
-                        hoverEnabled:true
-                        onEntered: {
-                        rpItem.itemAt(index).children[0].opacity=0.8
-                        }
-                        onExited: {
-                        rpItem.itemAt(index).children[0].opacity=1
-                        }
                         onReleased:{
                             if(firstPick === -1){
                                 firstPick = index
-                                rpItem.itemAt(index).children[0].scale=0.8
+                                rpItem.itemAt(index).children[0].opacity=0.5
                             }
-                            else if(secondPick === -1&&(index===firstPick+1||index===firstPick-1||index===firstPick+gridBg.columns||index===firstPick-gridBg.columns)){
+                            else if(secondPick === -1){
                                 secondPick = index
-                                rpItem.itemAt(index).children[0].scale=0.8
+                                rpItem.itemAt(index).children[0].opacity=0.5
                             }
                         }
                     }
@@ -226,11 +215,12 @@ Window {
 
             if(secondPick===firstPick-1||secondPick===firstPick+1||secondPick===firstPick-9||secondPick===firstPick+9)
             {
+
                 var item1 = rpItem.itemAt(firstPick).children[0].source
                 rpItem.itemAt(firstPick).children[0].source = rpItem.itemAt(secondPick).children[0].source
                 rpItem.itemAt(secondPick).children[0].source = item1
-                rpItem.itemAt(firstPick).children[0].scale=1
-                rpItem.itemAt(secondPick).children[0].scale=1
+                rpItem.itemAt(firstPick).children[0].opacity=1
+                rpItem.itemAt(secondPick).children[0].opacity=1
                 firstPick = -1
                 secondPick = -1
             }
@@ -257,12 +247,15 @@ Window {
             var tempcol=[]
             var del_arr=[]
             var empty=false
+
+
 //CHECKROW
             for(i=0;i<gridBg.rows;i++){
                 for(j=2;j<gridBg.columns ;j++){
                    if(rpItem.itemAt(gridBg.columns*i+j).children[0].source===rpItem.itemAt(gridBg.columns*i+j-1).children[0].source&&
                      rpItem.itemAt(gridBg.columns*i+j).children[0].source===rpItem.itemAt(gridBg.columns*i+j-2).children[0].source&&
                      rpItem.itemAt(gridBg.columns*i+j).children[0].source!==""){
+
                     rmatch=3
                     if(gridBg.columns*i+j%gridBg.columns<gridBg.columns-1){
                     if(rpItem.itemAt(gridBg.columns*i+j).children[0].source===rpItem.itemAt(gridBg.columns*i+j+1).children[0].source){
@@ -382,6 +375,11 @@ Window {
                     }
                 }
             }
+            if(score-oldScore>3){
+                bonus=10
+                score+=10
+            }
+            oldScore
 //Save old index location in new matrix
             var z
             var d
@@ -494,6 +492,7 @@ Window {
                     color: "red"
                     anchors.centerIn: parent
                 }
+
               }
             Rectangle {
                 id:scorenumber
@@ -513,6 +512,7 @@ Window {
                     anchors.centerIn: parent
                 }
             }
+
         }
         Rectangle {
             id:menubutton
@@ -608,12 +608,10 @@ Window {
                 color: "#e6e6e6"
                 radius: 5
             }
-
             contentItem: Item {
-                id: greenTimebar
+                id:greenTimebar
                 implicitWidth: playzone.width-60
                 implicitHeight: 35
-
                 Rectangle {
                     x: 0
                     y: 0
@@ -627,7 +625,7 @@ Window {
                 id: shuffle
                 anchors.left: timebar.right
                 anchors.leftMargin: 10
-                anchors.top: greenTimebar.top
+                anchors.top: timbar.top
                 width: greenTimebar.height
                 height: greenTimebar.height
                 color: "darkgray"
@@ -650,13 +648,12 @@ Window {
                 }
             }
         }
-
         Timer{
-            interval: 250
+            interval: 1000
             repeat: true
             running: true
             onTriggered: {
-                timebar.value -=0.25
+                timebar.value -=1
                 if(timebar.value < 0) running = false
             }
         }
@@ -669,13 +666,7 @@ Window {
             height:250
             focusPolicy: Qt.ClickFocus
             onReleased:{
-                if(Hint.findHint()!==-1){
-                for(var b=0;b<2;i++){
-                rpItem.itemAt(Hint.findHint()[b]).children[0].opacity=0.2
-                }
-                }
-                else
-                console.log("Not found")
+                resetGame()
             }
             anchors.bottom:quitbt.top
             anchors.bottomMargin:10
@@ -758,6 +749,7 @@ Window {
                 anchors.bottomMargin:10
                 anchors.left:parent.left
                 anchors.leftMargin:10
+
             }
             Button {
                 text: "Cancel"
